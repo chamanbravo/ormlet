@@ -1,6 +1,6 @@
-from ormlet.column import Column
-from ormlet.manager import DatabaseManager
-from ormlet.model import Model
-from ormlet.query_builder import delete, insert, select, update
+from .column import Column
+from .manager import DatabaseManager
+from .model import Model
+from .query_builder import delete, insert, select, update
 
 all = [Model, DatabaseManager, select, update, insert, delete, Column]

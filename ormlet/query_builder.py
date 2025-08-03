@@ -1,12 +1,14 @@
 import sqlite3
-from typing import Any
+from typing import Any, Generic, Type, TypeVar, Union
 
 from .model import Model
 from .result_map import query_result_mapper
 
+T = TypeVar("T", bound=Model)
 
-class QueryBuilder:
-    def __init__(self, cls: Model):
+
+class QueryBuilder(Generic[T]):
+    def __init__(self, cls: Type[T]):
         self.model_cls = cls
         self.query = ""
         self.insert_values = []
@@ -60,15 +62,15 @@ class QueryBuilder:
             self.insert_values = list(args)
         return self
 
-    def where(self, clause):
+    def where(self, clause: str):
         self.query += f" WHERE {clause}"
         return self
 
-    def and_(self, clause):
+    def and_(self, clause: str):
         self.query += f" AND {clause}"
         return self
 
-    def or_(self, clause):
+    def or_(self, clause: str):
         self.query += f" OR {clause}"
         return self
 
@@ -86,7 +88,7 @@ class QueryBuilder:
         self.query += f" LIMIT {limit}"
         return self
 
-    def execute(self, connection: sqlite3.Connection):
+    def execute(self, connection: sqlite3.Connection) -> Union[list[T], int, None]:
         try:
             cursor = connection.cursor()
 
@@ -109,20 +111,19 @@ class QueryBuilder:
 
         except Exception as e:
             print(f"Database error: {e}")
-            return None
 
 
-def select(cls: Model):
+def select(cls: Type[T]) -> QueryBuilder[T]:
     return QueryBuilder(cls).select()
 
 
-def insert(cls: Model):
+def insert(cls: Type[T]) -> QueryBuilder[T]:
     return QueryBuilder(cls).insert()
 
 
-def update(cls: Model):
+def update(cls: Type[T]) -> QueryBuilder[T]:
     return QueryBuilder(cls).update()
 
 
-def delete(cls: Model):
+def delete(cls: Type[T]) -> QueryBuilder[T]:
     return QueryBuilder(cls).delete()

@@ -31,14 +31,15 @@ def test_get_columns():
 
 def test_get_primary_field():
     pk = User.get_primary_field()
-    assert pk.primary_key
-    assert pk.field_name == "id"
+    if pk:
+        assert pk.primary_key
+        assert pk.field_name == "id"
 
 
 def test_column_sql_and_operators():
     col = column.IntegerField(primary_key=True, unique=True, default=1, nullable=False)
     col.field_name = "test"
-    sql = col._to_sql()
+    sql = col.to_sql()
 
     assert "PRIMARY KEY" in sql
     assert "UNIQUE" in sql

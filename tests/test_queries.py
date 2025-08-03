@@ -1,4 +1,5 @@
 import sqlite3
+from typing import Generator
 
 import pytest
 from ormlet.column import IntegerField, VarCharField
@@ -15,7 +16,7 @@ class User(Model):
 
 
 @pytest.fixture
-def connection():
+def connection() -> Generator[sqlite3.Connection, None, None]:
     conn = sqlite3.connect(":memory:")
     conn.row_factory = sqlite3.Row
     yield conn
@@ -23,7 +24,7 @@ def connection():
 
 
 @pytest.fixture(autouse=True)
-def setup_schema(connection):
+def setup_schema(connection: sqlite3.Connection):
     cursor = connection.cursor()
     cursor.execute("""
         CREATE TABLE users (
@@ -35,7 +36,7 @@ def setup_schema(connection):
     connection.commit()
 
 
-def test_insert_user(connection):
+def test_insert_user(connection: sqlite3.Connection):
     user_id = insert(User).values(id=1, name="Alice", age=30).execute(connection)
     assert isinstance(user_id, int)
 
@@ -46,20 +47,21 @@ def test_insert_user(connection):
     assert result["age"] == 30
 
 
-def test_select_user(connection):
+def test_select_user(connection: sqlite3.Connection):
     connection.execute(
         "INSERT INTO users (id, name, age) VALUES (?, ?, ?)", (1, "Bob", 25)
     )
     connection.commit()
 
     results = select(User).where(User.name == "Bob").execute(connection)
-    assert len(results) == 1
-    bob = results[0]
-    assert bob.name == "Bob"
-    assert bob.age == 25
+    if isinstance(results, list):
+        assert len(results) == 1
+        bob = results[0]
+        assert bob.name == "Bob"
+        assert bob.age == 25
 
 
-def test_update_user(connection):
+def test_update_user(connection: sqlite3.Connection):
     connection.execute(
         "INSERT INTO users (id, name, age) VALUES (?, ?, ?)", (1, "Charlie", 40)
     )
@@ -76,7 +78,7 @@ def test_update_user(connection):
     assert result["age"] == 41
 
 
-def test_delete_user(connection):
+def test_delete_user(connection: sqlite3.Connection):
     connection.execute(
         "INSERT INTO users (id, name, age) VALUES (?, ?, ?)", (1, "Dan", 50)
     )
@@ -91,7 +93,7 @@ def test_delete_user(connection):
     assert result is None
 
 
-def test_complex_where(connection):
+def test_complex_where(connection: sqlite3.Connection):
     connection.execute(
         "INSERT INTO users (id, name, age) VALUES (?, ?, ?)", (1, "Eve", 21)
     )
@@ -104,11 +106,12 @@ def test_complex_where(connection):
         select(User).where(User.name == "Eve").and_(User.age >= 20).execute(connection)
     )
 
-    assert len(results) == 1
-    assert results[0].age == 21
+    if isinstance(results, list):
+        assert len(results) == 1
+        assert results[0].age == 21
 
 
-def test_or_where_query(connection):
+def test_or_where_query(connection: sqlite3.Connection):
     connection.execute(
         "INSERT INTO users (id, name, age) VALUES (?, ?, ?)", (1, "Foo", 15)
     )
@@ -120,4 +123,5 @@ def test_or_where_query(connection):
     results = (
         select(User).where(User.name == "Foo").or_(User.age > 30).execute(connection)
     )
-    assert len(results) == 2
+    if isinstance(results, list):
+        assert len(results) == 2

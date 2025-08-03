@@ -1,10 +1,11 @@
 import sqlite3
+from typing import Optional, Type
 
-from ormlet.model import Model
+from .model import Model
 
 
 class ConnectionManager:
-    def __init__(self, db):
+    def __init__(self, db: str):
         self.db = db
 
     def __enter__(self) -> sqlite3.Connection:
@@ -14,7 +15,12 @@ class ConnectionManager:
         )
         return self.connection
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_value: Optional[BaseException],
+        traceback: Optional[object],
+    ) -> None:
         return self.connection.close()
 
 
@@ -25,7 +31,7 @@ class DatabaseManager:
     def connect(self):
         return self._connection_manager
 
-    def register_tables(self, tables: list[Model]):
+    def register_tables(self, tables: list[Type[Model]]):
         with self._connection_manager as connection:
             for table in tables:
                 cursor = connection.cursor()

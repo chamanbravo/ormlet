@@ -1,13 +1,17 @@
+from typing import ClassVar, Optional
+
 from .column import Column
 
 
 class Model:
+    __table__: ClassVar[str]
+
     @classmethod
     def get_table_schema(cls):
         table_name = cls.get_table_name()
         schema = f"CREATE TABLE IF NOT EXISTS '{table_name}' ("
-        columns = cls.get_columns()
-        schema += ", ".join([columns[key]._to_sql() for key in columns.keys()]) + ");"
+        columns: dict[str, Column] = cls.get_columns()
+        schema += ", ".join([columns[key].to_sql() for key in columns.keys()]) + ");"
 
         return schema
 
@@ -21,8 +25,8 @@ class Model:
         return table_name
 
     @classmethod
-    def get_columns(cls):
-        columns = {}
+    def get_columns(cls) -> dict[str, Column]:
+        columns: dict[str, Column] = {}
         for key, value in cls.__dict__.items():
             if isinstance(value, Column):
                 value.field_name = key
@@ -31,7 +35,7 @@ class Model:
         return columns
 
     @classmethod
-    def get_primary_field(cls):
+    def get_primary_field(cls) -> Optional[Column]:
         for _, value in cls.__dict__.items():
             if isinstance(value, Column):
                 if value.primary_key:

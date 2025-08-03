@@ -24,8 +24,8 @@ class Column:
         self.default = default
         self.nullable = nullable
 
-    def _to_sql(self) -> str:
-        sql = f"{self.field_name} {self.field_type}"
+    def to_sql(self) -> str:
+        sql: str = f"{self.field_name} {self.field_type}"
         if self.primary_key:
             sql += " PRIMARY KEY"
         if self.unique:
@@ -36,10 +36,10 @@ class Column:
             sql += f" DEFAULT {repr(self.default)}"
         return sql
 
-    def __eq__(self, other: Any) -> str:
+    def __eq__(self, other: Any) -> str:  # pyright: ignore[reportIncompatibleMethodOverride]
         return f"{self.field_name} = {repr(other)}"
 
-    def __ne__(self, other: Any) -> str:
+    def __ne__(self, other: Any) -> str:  # pyright: ignore[reportIncompatibleMethodOverride]
         return f"{self.field_name} != {repr(other)}"
 
     def __lt__(self, other: Any) -> str:
