@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://pypi.org/project/ormlet/"><img src="./docs/ormlet.jpg" alt="Ormlet"></a>
+  <a href="https://pypi.org/project/ormlet/"><img src="./docs/ormlet.png" width="300px" alt="Ormlet"></a>
 
 </p>
 <p align="center">
